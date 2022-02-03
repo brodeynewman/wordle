@@ -80,7 +80,6 @@ func printToConsole(st *State, p string) {
 }
 
 func (st *State) updateGuess(p string) {
-	fmt.Println(len(p), len(st.chosenWord), st.chosenWord)
 	if len(p) > len(st.chosenWord) || len(p) < len(st.chosenWord) {
 		fmt.Println("Invalid guess. You guessed a word that isn't 5 letters.")
 		(*st).guesses += 1
@@ -101,8 +100,6 @@ func NewState(store s.Store) State {
 	rn := 1 + rand.Intn(b-1+1)
 
 	chosen := words[rn]
-
-	fmt.Println("CHOSEN", chosen)
 
 	s := State{
 		guesses:    1,
