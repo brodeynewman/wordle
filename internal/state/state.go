@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	s "github.com/brodeynewman/wordle/internal/storage"
 
@@ -77,7 +78,10 @@ func (st *State) updateGuess(p string) {
 
 func NewState(store s.Store) State {
 	words := store.Get()
-	rn := rand.Intn(len(words))
+	b := len(words)
+
+	rand.Seed(time.Now().UnixNano())
+	rn := 1 + rand.Intn(b-1+1)
 
 	chosen := words[rn]
 
@@ -121,11 +125,11 @@ func announceWin(st *State) string {
 	var sb strings.Builder
 
 	if st.guesses == 1 {
-		sb.WriteString("Amazing! Either you're a genius, or you cheated! You guessed the word: ")
+		sb.WriteString("Amazing! Either you're a genius, or you cheated! You guessed the word ")
 	} else if st.guesses > 1 && st.guesses < 4 {
-		sb.WriteString("Great Job!! You're an above average player! You guessed the word: ")
+		sb.WriteString("Great Job!! You're an above average player! You guessed the word ")
 	} else {
-		sb.WriteString("Good Job!! You aren't a complete dummy! You guessed the word: ")
+		sb.WriteString("Good Job!! You aren't a complete dummy! You guessed the word ")
 	}
 
 	sb.WriteString(st.chosenWord)
