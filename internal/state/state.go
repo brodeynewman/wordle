@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
+	"strings"
 
 	s "github.com/brodeynewman/wordle/internal/storage"
 
@@ -23,15 +25,13 @@ type StateMachine interface {
 
 func suggestions(d prompt.Document) []prompt.Suggest {
 	s := []prompt.Suggest{
-		// {Text: "users", Description: "Store the username and age"},
+		{Text: "exit", Description: "Exits you from the game."},
 	}
 
 	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
 }
 
 func (st *State) UpdateGuess() {
-	fmt.Println("INC")
-
 	(*st).guesses += 1
 }
 
@@ -50,31 +50,39 @@ func NewState(store s.Store) State {
 	return s
 }
 
-func handleInput(phrase string, st State) {
+func handleInput(phrase string, st *State) {
 	switch phrase {
 	case "exit":
 		os.Exit(0)
 	}
 
 	if phrase != st.chosenWord {
-		fmt.Println("INC?")
 		st.UpdateGuess()
 	}
 }
 
-func initGame(st State) {
-	for st.guesses < 6 || !st.hasWon {
-		fmt.Println("HMM", st)
+func getGuessText(st *State) string {
+	var sb strings.Builder
 
-		t := prompt.Input("> ", suggestions)
+	sb.WriteString("Guess ")
+	sb.WriteString(strconv.FormatInt(int64(st.guesses), 10) + "/")
+	sb.WriteString(strconv.FormatInt(int64(st.maxGuesses), 10) + " > ")
+
+	return sb.String()
+}
+
+func initGame(st *State) {
+	for st.guesses <= 6 && !st.hasWon {
+		guess := getGuessText(st)
+
+		t := prompt.Input(guess, suggestions)
 		handleInput(t, st)
 	}
 
 	if st.hasWon {
 		fmt.Println("Nice Job!! You're a genius. You guessed the word:", st.chosenWord)
 	} else {
-		fmt.Println("Hm... You failed to guess the word:", st.chosenWord)
-		fmt.Println("Better luck next time.")
+		fmt.Println("Hm... You failed to guess the word " + "'" + st.chosenWord + "'" + ". Better luck next time!")
 	}
 }
 
@@ -83,5 +91,5 @@ func Init(store s.Store) {
 	fmt.Println("Welcome to Wordle! I have a 5 character word. Your job is to guess it within 6 Guesses. Lets go!")
 
 	st := NewState(store)
-	initGame(st)
+	initGame(&st)
 }
