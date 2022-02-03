@@ -9,7 +9,6 @@ import (
 	"time"
 
 	s "github.com/brodeynewman/wordle/internal/storage"
-
 	"github.com/c-bata/go-prompt"
 )
 
@@ -47,13 +46,30 @@ func printGrey(l byte) {
 }
 
 func printToConsole(st *State, p string) {
+	m := make(map[byte]int)
+
+	// We first have to loop through and find all of the exact matches...
+	// so that we don't show duplicate yellows.
+	//
+	// Imagine the word 'flued'. If a user guesses 'fleek', our program would...
+	// highlight both 'e' even though there is only 1. So we need to know ahead of time...
+	// how many instances of the exact matches there are so that we don't highlight more than once.
+	for i := 0; i < len(p); i++ {
+		x := p[i]
+		y := st.chosenWord[i]
+
+		if string(x) == string(y) {
+			m[x] += 1
+		}
+	}
+
 	for i := 0; i < len(p); i++ {
 		x := p[i]
 		y := st.chosenWord[i]
 
 		if string(x) == string(y) {
 			printGreen(x)
-		} else if strings.Contains(st.chosenWord, string(x)) {
+		} else if strings.Contains(st.chosenWord, string(x)) && m[x] != strings.Count(st.chosenWord, string(x)) {
 			printYellow(x)
 		} else {
 			printGrey(x)
@@ -64,8 +80,9 @@ func printToConsole(st *State, p string) {
 }
 
 func (st *State) updateGuess(p string) {
-	if len(p) > len(st.chosenWord) {
-		fmt.Println("Invalid guess. You guessed a word that is longer than 5 characters.")
+	fmt.Println(len(p), len(st.chosenWord), st.chosenWord)
+	if len(p) > len(st.chosenWord) || len(p) < len(st.chosenWord) {
+		fmt.Println("Invalid guess. You guessed a word that isn't 5 letters.")
 		(*st).guesses += 1
 
 		return
@@ -84,6 +101,8 @@ func NewState(store s.Store) State {
 	rn := 1 + rand.Intn(b-1+1)
 
 	chosen := words[rn]
+
+	fmt.Println("CHOSEN", chosen)
 
 	s := State{
 		guesses:    1,
@@ -160,10 +179,24 @@ func initGame(st *State) {
 	}
 }
 
-func Init(store s.Store) {
+func announceRules() {
+	fmt.Println()
 	fmt.Println("------------")
-	fmt.Println("Welcome to Wordle! I have a 5 character word. Your job is to guess it within 6 Guesses. Lets go!")
+	fmt.Println("Welcome to Wordle! I have a 5 character word. Your job is to guess it within 6 guesses.")
+	fmt.Println()
+	fmt.Println("Let me first explain the rules.")
+	fmt.Println()
+	fmt.Println("If the letter is highlighted green, that letter is in the correct spot of the target word.")
+	fmt.Println("If the letter is highlighted yellow, that letter exists in the word, but is in the wrong spot.")
+	fmt.Println("If the letter is not highlighted at all, it means the letter does not exist in the target word.")
+	fmt.Println()
+	fmt.Println("Good luck!")
+	fmt.Println("------------")
+	fmt.Println()
+}
 
+func Init(store s.Store) {
+	announceRules()
 	st := NewState(store)
 	initGame(&st)
 }

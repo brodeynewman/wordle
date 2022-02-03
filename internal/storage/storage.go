@@ -59,7 +59,7 @@ func formatForStorage(w Words) (Words, Words) {
 	for i := 0; i < len(w); i++ {
 		// only use words that have the same length as our default
 		if len(w[i]) == DEFAULT_WORD_LEN {
-			words = append(words, w[i]+",")
+			words = append(words, w[i])
 			cache = append(cache, w[i]+",")
 		}
 	}
