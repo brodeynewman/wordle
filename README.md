@@ -1,6 +1,6 @@
 # Wordle
 
-Actively learning Go, so figured this would be a fun little projec to build.
+Actively learning Go, so figured this would be a fun little project to build.
 
 ![Wordle](./assets/wordle.png)
 
