@@ -21,11 +21,6 @@ type Words []string
 type Store struct {
 	usingCache bool
 	words      Words
-	len        int
-}
-
-type Storage interface {
-	Get() []string
 }
 
 func (s *Store) Get() Words {
