@@ -124,6 +124,7 @@ func handleInput(phrase string, st *State) {
 		st.updateGuess(phrase)
 	} else {
 		st.setWin()
+		printToConsole(st, phrase)
 	}
 }
 
